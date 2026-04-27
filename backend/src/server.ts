@@ -13,6 +13,12 @@ import activityRoutes from './routes/activities';
 import dashboardRoutes from './routes/dashboard';
 
 dotenv.config();
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET орта айнымалысы анықталмаған. Сервер іске қосылмайды.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
