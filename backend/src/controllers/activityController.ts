@@ -8,9 +8,9 @@ export const getAllActivities = async (req: AuthRequest, res: Response): Promise
     const limit = parseInt(req.query['бет_өлшемі'] as string) || 10;
     const skip = (page - 1) * limit;
     const filter: Record<string, unknown> = {};
-    if (req.query['статус']) filter['статус'] = req.query['статус'];
-    if (req.query['түрі']) filter['түрі'] = req.query['түрі'];
-    if (req.query['клиент']) filter['клиент'] = req.query['клиент'];
+    if (req.query['статус']) filter['статус'] = String(req.query['статус']);
+    if (req.query['түрі']) filter['түрі'] = String(req.query['түрі']);
+    if (req.query['клиент']) filter['клиент'] = String(req.query['клиент']);
     const total = await Activity.countDocuments(filter);
     const activities = await Activity.find(filter)
       .populate('клиент', 'аты')

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/database';
 import { swaggerSpec } from './config/swagger';
 import swaggerUi from 'swagger-ui-express';
+import { authRateLimiter, generalRateLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import clientRoutes from './routes/clients';
@@ -19,12 +20,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/sales', saleRoutes);
-app.use('/api/activities', activityRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/auth', authRateLimiter, authRoutes);
+app.use('/api/users', generalRateLimiter, userRoutes);
+app.use('/api/clients', generalRateLimiter, clientRoutes);
+app.use('/api/sales', generalRateLimiter, saleRoutes);
+app.use('/api/activities', generalRateLimiter, activityRoutes);
+app.use('/api/dashboard', generalRateLimiter, dashboardRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

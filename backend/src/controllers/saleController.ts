@@ -8,7 +8,7 @@ export const getAllSales = async (req: AuthRequest, res: Response): Promise<void
     const limit = parseInt(req.query['бет_өлшемі'] as string) || 10;
     const skip = (page - 1) * limit;
     const filter: Record<string, unknown> = {};
-    if (req.query['статус']) filter['статус'] = req.query['статус'];
+    if (req.query['статус']) filter['статус'] = String(req.query['статус']);
     const total = await Sale.countDocuments(filter);
     const sales = await Sale.find(filter)
       .populate('клиент', 'аты')

@@ -2,6 +2,8 @@ import { Response } from 'express';
 import Client from '../models/Client';
 import { AuthRequest } from '../middleware/auth';
 
+const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const getAllClients = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const page = parseInt(req.query['беттің_нөмірі'] as string) || 1;
@@ -9,7 +11,7 @@ export const getAllClients = async (req: AuthRequest, res: Response): Promise<vo
     const skip = (page - 1) * limit;
     const filter: Record<string, unknown> = {};
     if (req.query['іздеу']) {
-      const search = req.query['іздеу'] as string;
+      const search = escapeRegex(String(req.query['іздеу']));
       filter['$or'] = [
         { аты: { $regex: search, $options: 'i' } },
         { эл_пошта: { $regex: search, $options: 'i' } },
@@ -17,7 +19,7 @@ export const getAllClients = async (req: AuthRequest, res: Response): Promise<vo
       ];
     }
     if (req.query['статус']) {
-      filter['статус'] = req.query['статус'];
+      filter['статус'] = String(req.query['статус']);
     }
     const total = await Client.countDocuments(filter);
     const clients = await Client.find(filter)
