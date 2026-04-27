@@ -10,12 +10,13 @@ const generateToken = (id: string): string => {
 export const register = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { аты, эл_пошта, құпия_сөз } = req.body as { аты: string; эл_пошта: string; құпия_сөз: string };
-    const existing = await User.findOne({ эл_пошта });
+    const emailStr = String(эл_пошта).toLowerCase().trim();
+    const existing = await User.findOne({ эл_пошта: emailStr });
     if (existing) {
       res.status(400).json({ қате: 'Бұл эл. пошта адресі бұрыннан тіркелген' });
       return;
     }
-    const user = await User.create({ аты, эл_пошта, құпия_сөз });
+    const user = await User.create({ аты: String(аты).trim(), эл_пошта: emailStr, құпия_сөз: String(құпия_сөз) });
     const token = generateToken(user._id.toString());
     res.status(201).json({
       хабарлама: 'Пайдаланушы сәтті тіркелді',
@@ -30,7 +31,8 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
 export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { эл_пошта, құпия_сөз } = req.body as { эл_пошта: string; құпия_сөз: string };
-    const user = await User.findOne({ эл_пошта });
+    const emailStr = String(эл_пошта).toLowerCase().trim();
+    const user = await User.findOne({ эл_пошта: emailStr });
     if (!user) {
       res.status(401).json({ қате: 'Эл. пошта немесе құпия сөз қате' });
       return;
@@ -39,7 +41,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
       res.status(401).json({ қате: 'Пайдаланушы блокталған' });
       return;
     }
-    const isMatch = await user.comparePassword(құпия_сөз);
+    const isMatch = await user.comparePassword(String(құпия_сөз));
     if (!isMatch) {
       res.status(401).json({ қате: 'Эл. пошта немесе құпия сөз қате' });
       return;
@@ -58,7 +60,7 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
 export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ қате: 'Тіркеліктен өтпеңіз' });
+      res.status(401).json({ қате: 'Аутентификация қажет' });
       return;
     }
     res.json({ пайдаланушы: req.user });
@@ -70,13 +72,13 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ қате: 'Тіркеліктен өтпеңіз' });
+      res.status(401).json({ қате: 'Аутентификация қажет' });
       return;
     }
     const { аты, эл_пошта } = req.body as { аты: string; эл_пошта: string };
     const updated = await User.findByIdAndUpdate(
       req.user._id,
-      { аты, эл_пошта },
+      { аты: String(аты).trim(), эл_пошта: String(эл_пошта).toLowerCase().trim() },
       { new: true, select: '-құпия_сөз' }
     );
     res.json({ хабарлама: 'Профиль жаңартылды', пайдаланушы: updated });

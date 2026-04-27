@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import Sale from '../models/Sale';
 import { AuthRequest } from '../middleware/auth';
+import { rejectInvalidId } from '../utils/objectId';
 
 export const getAllSales = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -23,6 +24,7 @@ export const getAllSales = async (req: AuthRequest, res: Response): Promise<void
 
 export const getSaleById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const sale = await Sale.findById(req.params.id)
       .populate('клиент', 'аты')
       .populate('менеджер', 'аты эл_пошта');
@@ -47,6 +49,7 @@ export const createSale = async (req: AuthRequest, res: Response): Promise<void>
 
 export const updateSale = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!sale) {
       res.status(404).json({ қате: 'Сату табылмады' });
@@ -60,6 +63,7 @@ export const updateSale = async (req: AuthRequest, res: Response): Promise<void>
 
 export const deleteSale = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const sale = await Sale.findByIdAndDelete(req.params.id);
     if (!sale) {
       res.status(404).json({ қате: 'Сату табылмады' });
@@ -76,7 +80,7 @@ export const getSalesByStage = async (req: AuthRequest, res: Response): Promise<
     const pipeline = await Sale.aggregate([
       {
         $group: {
-          _id: '$статус',
+          _id: '$сатыс',
           саны: { $sum: 1 },
           жалпы_сома: { $sum: '$сомасы' },
         },

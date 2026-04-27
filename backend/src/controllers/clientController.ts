@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import Client from '../models/Client';
 import { AuthRequest } from '../middleware/auth';
+import { rejectInvalidId } from '../utils/objectId';
 
 const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -34,6 +35,7 @@ export const getAllClients = async (req: AuthRequest, res: Response): Promise<vo
 
 export const getClientById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const client = await Client.findById(req.params.id).populate('жауапты_менеджер', 'аты эл_пошта');
     if (!client) {
       res.status(404).json({ қате: 'Клиент табылмады' });
@@ -56,6 +58,7 @@ export const createClient = async (req: AuthRequest, res: Response): Promise<voi
 
 export const updateClient = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const client = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!client) {
       res.status(404).json({ қате: 'Клиент табылмады' });
@@ -69,6 +72,7 @@ export const updateClient = async (req: AuthRequest, res: Response): Promise<voi
 
 export const deleteClient = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const client = await Client.findByIdAndDelete(req.params.id);
     if (!client) {
       res.status(404).json({ қате: 'Клиент табылмады' });

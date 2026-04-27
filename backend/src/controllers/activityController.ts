@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../middleware/auth';
+import { rejectInvalidId } from '../utils/objectId';
 
 export const getAllActivities = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -10,7 +11,11 @@ export const getAllActivities = async (req: AuthRequest, res: Response): Promise
     const filter: Record<string, unknown> = {};
     if (req.query['статус']) filter['статус'] = String(req.query['статус']);
     if (req.query['түрі']) filter['түрі'] = String(req.query['түрі']);
-    if (req.query['клиент']) filter['клиент'] = String(req.query['клиент']);
+    if (req.query['клиент']) {
+      const clientId = String(req.query['клиент']);
+      if (rejectInvalidId(clientId, res)) return;
+      filter['клиент'] = clientId;
+    }
     const total = await Activity.countDocuments(filter);
     const activities = await Activity.find(filter)
       .populate('клиент', 'аты')
@@ -25,6 +30,7 @@ export const getAllActivities = async (req: AuthRequest, res: Response): Promise
 
 export const getActivityById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const activity = await Activity.findById(req.params.id)
       .populate('клиент', 'аты')
       .populate('менеджер', 'аты эл_пошта');
@@ -49,6 +55,7 @@ export const createActivity = async (req: AuthRequest, res: Response): Promise<v
 
 export const updateActivity = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!activity) {
       res.status(404).json({ қате: 'Іс-шара табылмады' });
@@ -62,6 +69,7 @@ export const updateActivity = async (req: AuthRequest, res: Response): Promise<v
 
 export const deleteActivity = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    if (rejectInvalidId(req.params.id, res)) return;
     const activity = await Activity.findByIdAndDelete(req.params.id);
     if (!activity) {
       res.status(404).json({ қате: 'Іс-шара табылмады' });

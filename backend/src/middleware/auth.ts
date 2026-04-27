@@ -40,7 +40,7 @@ export const authenticateToken = async (
 export const authorizeRoles = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({ қате: 'Тіркеліктен өтпеңіз' });
+      res.status(401).json({ қате: 'Аутентификация қажет' });
       return;
     }
     if (!roles.includes(req.user.рөлі)) {
