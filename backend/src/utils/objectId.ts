@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { Response } from 'express';
 
-export const isValidObjectId = (id: string): boolean =>
-  mongoose.Types.ObjectId.isValid(id);
-
-export const rejectInvalidId = (id: string, res: Response): boolean => {
-  if (!isValidObjectId(id)) {
+export const parseObjectId = (
+  id: string,
+  res: Response
+): mongoose.Types.ObjectId | null => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     res.status(400).json({ қате: 'Жарамсыз идентификатор форматы' });
-    return true;
+    return null;
   }
-  return false;
+  return new mongoose.Types.ObjectId(id);
 };

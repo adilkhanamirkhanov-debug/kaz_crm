@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import Sale from '../models/Sale';
 import { AuthRequest } from '../middleware/auth';
-import { rejectInvalidId } from '../utils/objectId';
+import { parseObjectId } from '../utils/objectId';
 
 export const getAllSales = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -24,8 +24,9 @@ export const getAllSales = async (req: AuthRequest, res: Response): Promise<void
 
 export const getSaleById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const sale = await Sale.findById(req.params.id)
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const sale = await Sale.findById(_oid)
       .populate('клиент', 'аты')
       .populate('менеджер', 'аты эл_пошта');
     if (!sale) {
@@ -49,8 +50,9 @@ export const createSale = async (req: AuthRequest, res: Response): Promise<void>
 
 export const updateSale = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const sale = await Sale.findByIdAndUpdate(_oid, req.body, { new: true });
     if (!sale) {
       res.status(404).json({ қате: 'Сату табылмады' });
       return;
@@ -63,8 +65,9 @@ export const updateSale = async (req: AuthRequest, res: Response): Promise<void>
 
 export const deleteSale = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const sale = await Sale.findByIdAndDelete(req.params.id);
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const sale = await Sale.findByIdAndDelete(_oid);
     if (!sale) {
       res.status(404).json({ қате: 'Сату табылмады' });
       return;

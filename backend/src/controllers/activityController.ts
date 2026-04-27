@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import Activity from '../models/Activity';
 import { AuthRequest } from '../middleware/auth';
-import { rejectInvalidId } from '../utils/objectId';
+import { parseObjectId } from '../utils/objectId';
 
 export const getAllActivities = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -12,9 +12,9 @@ export const getAllActivities = async (req: AuthRequest, res: Response): Promise
     if (req.query['статус']) filter['статус'] = String(req.query['статус']);
     if (req.query['түрі']) filter['түрі'] = String(req.query['түрі']);
     if (req.query['клиент']) {
-      const clientId = String(req.query['клиент']);
-      if (rejectInvalidId(clientId, res)) return;
-      filter['клиент'] = clientId;
+      const clientOid = parseObjectId(String(req.query['клиент']), res);
+      if (!clientOid) return;
+      filter['клиент'] = clientOid;
     }
     const total = await Activity.countDocuments(filter);
     const activities = await Activity.find(filter)
@@ -30,8 +30,9 @@ export const getAllActivities = async (req: AuthRequest, res: Response): Promise
 
 export const getActivityById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const activity = await Activity.findById(req.params.id)
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const activity = await Activity.findById(_oid)
       .populate('клиент', 'аты')
       .populate('менеджер', 'аты эл_пошта');
     if (!activity) {
@@ -55,8 +56,9 @@ export const createActivity = async (req: AuthRequest, res: Response): Promise<v
 
 export const updateActivity = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const activity = await Activity.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const activity = await Activity.findByIdAndUpdate(_oid, req.body, { new: true });
     if (!activity) {
       res.status(404).json({ қате: 'Іс-шара табылмады' });
       return;
@@ -69,8 +71,9 @@ export const updateActivity = async (req: AuthRequest, res: Response): Promise<v
 
 export const deleteActivity = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (rejectInvalidId(req.params.id, res)) return;
-    const activity = await Activity.findByIdAndDelete(req.params.id);
+    const _oid = parseObjectId(req.params.id, res);
+    if (!_oid) return;
+    const activity = await Activity.findByIdAndDelete(_oid);
     if (!activity) {
       res.status(404).json({ қате: 'Іс-шара табылмады' });
       return;
