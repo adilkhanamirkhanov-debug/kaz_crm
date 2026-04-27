@@ -8,7 +8,7 @@ const router = Router();
 router.get('/', authenticateToken, getAllActivities);
 router.get('/:id', authenticateToken, getActivityById);
 router.post('/', authenticateToken, validateRequest(activitySchema), createActivity);
-router.put('/:id', authenticateToken, updateActivity);
+router.put('/:id', authenticateToken, validateRequest(activitySchema.partial()), updateActivity);
 router.delete('/:id', authenticateToken, deleteActivity);
 
 export default router;

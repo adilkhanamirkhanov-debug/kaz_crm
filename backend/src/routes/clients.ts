@@ -8,7 +8,7 @@ const router = Router();
 router.get('/', authenticateToken, getAllClients);
 router.get('/:id', authenticateToken, getClientById);
 router.post('/', authenticateToken, authorizeRoles('admin', 'manager'), validateRequest(clientSchema), createClient);
-router.put('/:id', authenticateToken, authorizeRoles('admin', 'manager'), updateClient);
+router.put('/:id', authenticateToken, authorizeRoles('admin', 'manager'), validateRequest(clientSchema.partial()), updateClient);
 router.delete('/:id', authenticateToken, authorizeRoles('admin', 'manager'), deleteClient);
 
 export default router;
